@@ -9,6 +9,9 @@ __pycache__/
 *.egg-info/
 frontend/node_modules/
 frontend/dist/
+frontend/*.tsbuildinfo
+frontend/vite.config.d.ts
+frontend/vite.config.js
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
