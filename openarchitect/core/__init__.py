@@ -1,0 +1,2 @@
+"""Core OpenArchitect domain code."""
+
