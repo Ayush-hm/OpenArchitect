@@ -132,8 +132,8 @@ export default function App() {
 
       <main className="workspace">
         <aside className="sidebar">
-          <section className="upload-panel">
-            <label className="file-drop">
+          {/* <section className="upload-panel"> */}
+            {/* <label className="file-drop">
               <Upload size={20} />
               <span>{file ? file.name : "Select SAD file"}</span>
               <input accept=".pdf,.txt,.md" type="file" onChange={onFileChange} />
@@ -142,9 +142,9 @@ export default function App() {
               {isRunning ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
               <span>{isRunning ? "Running" : "Run Review"}</span>
             </button>
-            {error ? <div className="error-box">{error}</div> : null}
-          </section>
-
+            {error ? <div className="error-box">{error}</div> : null} */}
+          {/* </section> */}
+       
           <section className="stage-panel">
             {workflowStages.map((stage) => (
               <div className="stage-row" key={stage}>
@@ -153,7 +153,7 @@ export default function App() {
               </div>
             ))}
           </section>
-
+          <hr style={{ border: 'none', borderBottom: '0.1rem solid gray', marginTop: '2rem' }} />
           <nav className="side-nav">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -174,7 +174,13 @@ export default function App() {
 
         <section className="main-panel">
           {!result ? (
-            <EmptyState isRunning={isRunning} />
+            <EmptyState
+              isRunning={isRunning}
+              file={file}
+              onFileChange={onFileChange}
+              runReview={runReview}
+              error={error}
+            />
           ) : (
             <>
               {selectedView === "overview" ? <Overview result={result} summary={summary!} /> : null}
@@ -201,16 +207,69 @@ export default function App() {
   );
 }
 
-function EmptyState({ isRunning }: { isRunning: boolean }) {
+function EmptyState({
+  isRunning,
+  file,
+  onFileChange,
+  runReview,
+  error,
+}: {
+  isRunning: boolean;
+  file: File | null;
+  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  runReview: () => void;
+  error: string | null;
+}) {
   return (
     <div className="empty-state">
-      {isRunning ? <Loader2 className="spin" size={28} /> : <FileText size={28} />}
-      <h2>{isRunning ? "Review in progress" : "Upload a Software Architecture Document"}</h2>
-      <p>
-        {isRunning
-          ? "The review can take a few minutes while model calls complete."
-          : "PDF, TXT, and Markdown files are supported."}
-      </p>
+      <div className="upload-center-card">
+        {isRunning ? (
+          <Loader2 className="spin" size={42} />
+        ) : (
+          <div/>
+        )}
+
+        <h2>
+          {isRunning
+            ? "Architecture Review Running"
+            : "Upload a Software Architecture Document"}
+        </h2>
+
+        <label className="large-file-drop">
+          <Upload size={38} />
+          <span>{file ? file.name : "Select Architecture Document"}</span>
+          <span><p>
+            PDF, TXT and Markdown files are supported.
+          </p></span>
+          <input
+            accept=".pdf,.txt,.md"
+            type="file"
+            onChange={onFileChange}
+          />
+        </label>
+
+        <button
+          className="primary-button large"
+          disabled={isRunning}
+          onClick={runReview}
+        >
+          {isRunning ? (
+            <Loader2 className="spin" size={18} />
+          ) : (
+            <Play size={18} />
+          )}
+
+          <span>
+            {isRunning ? "Running Review..." : "Run Review"}
+          </span>
+        </button>
+
+        {error && (
+          <div className="error-box">
+            {error}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

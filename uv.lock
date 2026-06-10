@@ -409,6 +409,7 @@ dependencies = [
     { name = "langgraph" },
     { name = "pydantic" },
     { name = "pypdf" },
+    { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -426,6 +427,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.8.0" },
     { name = "pypdf", specifier = ">=5.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.2.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-multipart", specifier = ">=0.0.9" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30.0" },
 ]
