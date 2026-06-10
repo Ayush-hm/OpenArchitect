@@ -94,11 +94,22 @@ button {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  overflow: auto;
+  height: calc(100vh - 76px);
+  position: sticky;
+  top: 0;
+  overflow: hidden;
 }
 
+.stage-panel {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
+  overflow-y: auto;
+
+  max-height: calc(100vh - 280px);
+}
 
 .upload-panel,
 .stage-panel,
@@ -197,9 +208,18 @@ button {
 }
 
 .side-nav {
-  /* margin-top:auto; */
+  margin-top: auto;
+
   display: grid;
   gap: 2px;
+
+  padding-top: 12px;
+
+  border-top: 1px solid #d9dfd8;
+
+  background: #f7f8f6;
+
+  flex-shrink: 0;
 }
 
 .nav-button {
@@ -634,23 +654,22 @@ button {
   }
 
   .sidebar {
+    height: auto;
+    position: static;
+
     border-right: 0;
     border-bottom: 1px solid #d9dfd8;
+
+    overflow: visible;
+  }
+
+  .stage-panel {
+    flex: unset;
+    overflow: visible;
   }
 
   .side-nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .split-view,
-  .two-column,
-  .three-column,
-  .metric-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-panel {
-    position: static;
+    margin-top: 0;
   }
 }
 

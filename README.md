@@ -1,4 +1,5 @@
 # OpenArchitect
+<<<<<<< HEAD
 
 OpenArchitect turns architecture documents into reviewed architecture decisions, ADRs, and updated diagrams.
 
@@ -98,3 +99,6 @@ The UI expects the API at `http://127.0.0.1:8000` by default. Override it with:
 ```text
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
+=======
+OpenArchitect is an AI-powered architecture review workspace that ingests software design documents such as SADs, HLDs, LLDs, and RFCs, then converts them into evidence-backed architecture findings, ADRs, and an evolved target-state design.​
+>>>>>>> main

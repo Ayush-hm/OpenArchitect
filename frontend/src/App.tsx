@@ -131,20 +131,7 @@ export default function App() {
       </header>
 
       <main className="workspace">
-        <aside className="sidebar">
-          {/* <section className="upload-panel"> */}
-            {/* <label className="file-drop">
-              <Upload size={20} />
-              <span>{file ? file.name : "Select SAD file"}</span>
-              <input accept=".pdf,.txt,.md" type="file" onChange={onFileChange} />
-            </label>
-            <button className="primary-button" disabled={isRunning} onClick={runReview} title="Run review">
-              {isRunning ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
-              <span>{isRunning ? "Running" : "Run Review"}</span>
-            </button>
-            {error ? <div className="error-box">{error}</div> : null} */}
-          {/* </section> */}
-       
+        <aside className="sidebar">       
           <section className="stage-panel">
             {workflowStages.map((stage) => (
               <div className="stage-row" key={stage}>
