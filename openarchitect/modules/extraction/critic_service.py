@@ -70,8 +70,8 @@ Guidelines:
   evidence is unsupported or a better explicitly supported relationship exists.
 - Keep the patch minimal. If the graph is acceptable, return empty lists.
 
-Original SAD excerpt:
-{document_text[:12000]}
+Original SAD full text:
+{document_text}
 
 Current graph JSON:
 {json.dumps(graph.model_dump(by_alias=True), separators=(",", ":"))}

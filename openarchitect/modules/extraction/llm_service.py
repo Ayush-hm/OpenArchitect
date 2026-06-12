@@ -33,7 +33,7 @@ Hard rules:
 - Constraints should include facts such as single-AZ, single instance, no autoscaling, disabled encryption, public subnet, no DR, undefined RTO/RPO.
 
 SAD text:
-{document_text[:12000]}
+{document_text}
 
 Return only valid JSON in this exact shape:
 {{
