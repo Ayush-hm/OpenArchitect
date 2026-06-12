@@ -8,6 +8,11 @@ from openarchitect.modules.planning.validation import (
     validate_and_repair_decisions,
     validate_and_repair_findings,
 )
+from openarchitect.modules.review.frameworks import (
+    AWS_WELL_ARCHITECTED_PROFILE,
+    FrameworkProfile,
+)
+from openarchitect.observability import traceable_step
 
 
 class LeadArchitectOutput(BaseModel):
@@ -15,30 +20,42 @@ class LeadArchitectOutput(BaseModel):
     decisions: list[ArchitectureDecision] = Field(default_factory=list)
 
 
+@traceable_step(name="Lead Architect Consolidation", run_type="chain")
 async def consolidate_with_lead_architect_llm(
     graph: ArchitectureGraph,
     findings: list[ReviewFinding],
     model_provider: ModelProvider,
+    framework: FrameworkProfile = AWS_WELL_ARCHITECTED_PROFILE,
 ) -> LeadArchitectOutput:
     prompt = f"""
 You are the Lead Architect agent.
 
-Consolidate specialist review findings into a coherent architecture plan.
+Consolidate {framework.name} pillar review findings into a coherent architecture
+plan.
+
+Configured pillars:
+{_pillar_summary(framework)}
 
 Responsibilities:
 - Deduplicate overlapping findings.
-- Resolve conflicts between reliability, security, scalability, and FinOps goals.
+- Resolve conflicts across the configured framework pillars.
 - Prioritize the most important findings.
 - Decide which findings require ADRs.
 - Create architecture decisions only for ADR-worthy findings.
 - Preserve or rewrite finding IDs so linked decisions can reference them.
+- Preserve framework, pillar, risk_area, and assumption_or_unknown metadata on
+  final findings where possible.
 
 Rules:
 - Do not invent findings that are not grounded in the provided graph or specialist findings.
 - Security issues involving disabled encryption, public subnets, or tenant data isolation are ADR-worthy unless clearly trivial.
 - Reliability issues involving single-AZ, single instance databases, missing DR, RTO, or RPO are ADR-worthy.
-- Scalability issues involving no autoscaling under explicit load targets are ADR-worthy.
-- FinOps issues are ADR-worthy when they affect architecture shape or operational policy.
+- Performance efficiency issues involving no autoscaling, clear bottlenecks, or
+  unmet explicit load targets are ADR-worthy.
+- Cost optimization issues are ADR-worthy when they affect architecture shape or
+  operational policy.
+- Operational excellence and sustainability issues are ADR-worthy when the
+  recommendation changes architecture shape or material operational policy.
 - Each decision must include context, decision, alternatives, consequences, impacted components, linked finding IDs, and diagram changes.
 
 Architecture graph JSON:
@@ -64,6 +81,8 @@ The previous Lead Architect output failed contract validation.
 
 Repair only the decisions and findings. Return valid structured output.
 
+Review framework: {framework.name}
+
 Validation issues:
 {[issue.__dict__ for issue in issues]}
 
@@ -75,6 +94,8 @@ Rules:
   rationale in the recommendation.
 - Do not reference findings that are not present.
 - Do not invent unrelated decisions.
+- Preserve framework, pillar, risk_area, and assumption_or_unknown metadata where
+  it is already present.
 
 Architecture graph JSON:
 {graph.model_dump_json(by_alias=True)}
@@ -96,3 +117,10 @@ Previous decisions JSON:
     if final_coverage_issues:
         final_findings = downgrade_uncovered_adr_findings(final_findings, final_decisions)
     return LeadArchitectOutput(findings=final_findings, decisions=final_decisions)
+
+
+def _pillar_summary(framework: FrameworkProfile) -> str:
+    return "\n".join(
+        f"- {pillar.id}: {pillar.name} ({pillar.reviewer_role})"
+        for pillar in framework.pillars
+    )

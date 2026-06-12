@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 from openarchitect.core.contracts.model_provider import ModelProvider
 from openarchitect.core.schemas.architecture import AttributeValue
 from openarchitect.core.schemas import ArchitectureEdge, ArchitectureGraph, ArchitectureNode, NodeType, RelationshipType
+from openarchitect.observability import traceable_step
 
 
 class NodeRemovalPatch(BaseModel):
@@ -46,6 +47,7 @@ class GraphCriticPatchOutput(BaseModel):
     add_unknowns: list[str] = Field(default_factory=list)
 
 
+@traceable_step(name="Graph Critic", run_type="chain")
 async def critique_architecture_graph(
     graph: ArchitectureGraph,
     document_text: str,

@@ -29,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 store = InMemoryWorkflowStore()
-ENGINE_VERSION = "evidence-bound-graph-v3"
+ENGINE_VERSION = "aws-well-architected-v1"
 
 
 class WorkflowRunResponse(BaseModel):

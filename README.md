@@ -1,12 +1,15 @@
 # OpenArchitect
-<<<<<<< HEAD
 
-OpenArchitect turns architecture documents into reviewed architecture decisions, ADRs, and updated diagrams.
+OpenArchitect is an AI-powered architecture review workspace that ingests
+software design documents such as SADs, HLDs, LLDs, and RFCs, then converts
+them into evidence-backed architecture findings, ADRs, and an evolved
+target-state design.
 
 Hackathon defaults:
 
 - Runtime: LangGraph
 - Model provider: Google Gemini via AI Studio
+- Review framework: AWS Well-Architected
 - Architecture: modular monolith
 
 Current pipeline:
@@ -15,12 +18,28 @@ Current pipeline:
 SAD / Architecture Text
   -> Architecture Extraction
   -> Graph Critic Validation
-  -> Multi-Agent Review
+  -> AWS Well-Architected Pillar Review
   -> Finding Coverage Critic
-  -> Architecture v2 Planning
+  -> Lead Architect Consolidation
   -> Decision-Bound ADRs
+  -> Architecture v2 Planning
   -> Updated Mermaid Diagram
 ```
+
+The AWS profile runs one reviewer per Well-Architected pillar:
+
+- Operational Excellence
+- Security
+- Reliability
+- Performance Efficiency
+- Cost Optimization
+- Sustainability
+
+When LangSmith tracing is enabled, OpenArchitect records manual spans for the
+workflow, extraction, graph critic, pillar reviewers, coverage critic, lead
+architect, v2 planner, and custom Gemini/NVIDIA provider calls. Trace payloads
+summarize document, prompt, and response sizes instead of sending full SAD text
+or raw prompts by default.
 
 Run locally:
 
@@ -44,6 +63,13 @@ Configure `.env`:
 
 ```text
 OPENARCHITECT_MODEL_PROVIDER=gemini
+OPENARCHITECT_REVIEW_FRAMEWORK=aws
+
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=your-langsmith-api-key
+LANGSMITH_PROJECT=openarchitect-aws-review
+# Optional for non-default LangSmith regions:
+# LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
 
 GEMINI_API_KEY=your-google-ai-studio-api-key
 GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
@@ -71,12 +97,6 @@ NVIDIA_NIM_MAX_TOKENS=2048
 NVIDIA_NIM_FORCE_JSON_RESPONSE=false
 ```
 
-Local rule fallback is available only for development:
-
-```powershell
-$env:OPENARCHITECT_ALLOW_RULE_FALLBACK="1"
-```
-
 Example request:
 
 ```powershell
@@ -99,6 +119,3 @@ The UI expects the API at `http://127.0.0.1:8000` by default. Override it with:
 ```text
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
-=======
-OpenArchitect is an AI-powered architecture review workspace that ingests software design documents such as SADs, HLDs, LLDs, and RFCs, then converts them into evidence-backed architecture findings, ADRs, and an evolved target-state design.​
->>>>>>> main

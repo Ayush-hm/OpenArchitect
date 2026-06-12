@@ -8,12 +8,14 @@ from openarchitect.core.schemas import ArchitectureEdge, ArchitectureGraph
 from openarchitect.modules.extraction.service import extract_architecture
 from openarchitect.modules.extraction.critic_service import critique_architecture_graph
 from openarchitect.modules.extraction.validation import validate_architecture_graph
+from openarchitect.observability import traceable_step
 
 
 class ArchitectureGraphOutput(BaseModel):
     architecture: ArchitectureGraph
 
 
+@traceable_step(name="Extract Architecture With LLM", run_type="chain")
 async def extract_architecture_with_llm(
     document_text: str,
     model_provider: ModelProvider,

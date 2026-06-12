@@ -31,7 +31,7 @@ const workflowStages = [
   "Ingestion",
   "Architecture Extraction",
   "Graph Critic",
-  "Specialist Review",
+  "AWS Pillar Review",
   "Finding Coverage",
   "Lead Architect",
   "ADR Generation",
@@ -287,7 +287,7 @@ function Overview({
                 <SeverityBadge severity={finding.severity} />
                 <div>
                   <strong>{finding.finding}</strong>
-                  <span>{finding.agent_role}</span>
+                  <span>{finding.pillar ?? finding.agent_role}</span>
                 </div>
               </div>
             ))}
@@ -376,7 +376,7 @@ function FindingsView({
               <SeverityBadge severity={finding.severity} />
               <span>{finding.id}</span>
               <strong>{finding.finding}</strong>
-              <span>{finding.agent_role}</span>
+              <span>{finding.pillar ?? finding.agent_role}</span>
             </button>
           ))}
         </div>
@@ -511,8 +511,15 @@ function FindingDetail({ finding }: { finding: ReviewFinding }) {
     <div className="detail-stack">
       <SeverityBadge severity={finding.severity} />
       <p>{finding.finding}</p>
+      <DetailList title="Framework" items={[finding.framework ?? "Not recorded"]} />
+      <DetailList title="Pillar" items={[finding.pillar ?? finding.agent_role]} />
+      <DetailList title="Risk Area" items={[finding.risk_area ?? "Not recorded"]} />
       <DetailList title="Evidence" items={finding.evidence} />
       <DetailList title="Affected Components" items={finding.affected_components} />
+      <DetailList
+        title="Assumption / Unknown"
+        items={finding.assumption_or_unknown ? [finding.assumption_or_unknown] : []}
+      />
       <DetailList title="Recommendation" items={[finding.recommendation]} />
       <DetailList title="ADR" items={[finding.requires_adr ? "Required" : "Not required"]} />
     </div>

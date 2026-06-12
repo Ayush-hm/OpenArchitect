@@ -16,6 +16,7 @@ from openarchitect.core.schemas import (
 )
 from openarchitect.core.schemas.architecture import AttributeValue
 from openarchitect.modules.diagram.service import build_architecture_v2
+from openarchitect.observability import traceable_step
 
 
 class V2NodeAddPatch(BaseModel):
@@ -83,6 +84,7 @@ class ArchitectureV2PatchOutput(BaseModel):
     add_constraints: list[V2ConstraintPatch] = Field(default_factory=list)
 
 
+@traceable_step(name="Architecture v2 Planner", run_type="chain")
 async def plan_architecture_v2_with_llm(
     graph: ArchitectureGraph,
     decisions: list[ArchitectureDecision],

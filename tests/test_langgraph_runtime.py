@@ -162,7 +162,7 @@ class FakeModelProvider(ModelProvider):
         raise AssertionError(f"Unexpected schema {schema.__name__}")
 
 
-def test_llm_langgraph_runs_parallel_specialists_and_lead_architect() -> None:
+def test_llm_langgraph_runs_parallel_pillar_reviewers_and_lead_architect() -> None:
     provider = FakeModelProvider()
 
     state = asyncio.run(
@@ -172,14 +172,24 @@ def test_llm_langgraph_runs_parallel_specialists_and_lead_architect() -> None:
         )
     )
 
-    assert provider.schemas.count("ReviewFindingsOutput") == 4
-    assert any("Scalability Architect" in prompt for prompt in provider.prompts)
-    assert any("Reliability Architect" in prompt for prompt in provider.prompts)
-    assert any("Security Architect" in prompt for prompt in provider.prompts)
-    assert any("FinOps Architect" in prompt for prompt in provider.prompts)
+    assert provider.schemas.count("ReviewFindingsOutput") == 6
+    assert any("Operational Excellence Reviewer" in prompt for prompt in provider.prompts)
+    assert any("Security Reviewer" in prompt for prompt in provider.prompts)
+    assert any("Reliability Reviewer" in prompt for prompt in provider.prompts)
+    assert any("Performance Efficiency Reviewer" in prompt for prompt in provider.prompts)
+    assert any("Cost Optimization Reviewer" in prompt for prompt in provider.prompts)
+    assert any("Sustainability Reviewer" in prompt for prompt in provider.prompts)
     assert "FindingCoveragePatchOutput" in provider.schemas
     assert "LeadArchitectOutput" in provider.schemas
     assert "ArchitectureV2PatchOutput" in provider.schemas
+    assert set(state["reviewed_pillars"]) == {
+        "operational_excellence",
+        "security",
+        "reliability",
+        "performance_efficiency",
+        "cost_optimization",
+        "sustainability",
+    }
     assert state["findings"][0].agent_role == "Lead Architect"
     assert state["decisions"][0].linked_finding_ids == ["lead-001"]
     assert state["adrs"][0].id == "ADR-001"
@@ -189,10 +199,12 @@ def test_llm_langgraph_runs_parallel_specialists_and_lead_architect() -> None:
 
 def _role_from_prompt(prompt: str) -> str:
     for role in (
-        "Scalability Architect",
-        "Reliability Architect",
-        "Security Architect",
-        "FinOps Architect",
+        "Operational Excellence Reviewer",
+        "Security Reviewer",
+        "Reliability Reviewer",
+        "Performance Efficiency Reviewer",
+        "Cost Optimization Reviewer",
+        "Sustainability Reviewer",
     ):
         if role in prompt:
             return role

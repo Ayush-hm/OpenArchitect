@@ -11,6 +11,7 @@ from openarchitect.providers.structured_output import (
     compact_schema,
     extract_json_object,
 )
+from openarchitect.observability import record_llm_usage, traceable_step
 
 load_dotenv()
 
@@ -53,6 +54,11 @@ class GeminiProvider(ModelProvider):
             "reasoning_effort": self.reasoning_effort or None,
         }
 
+    @traceable_step(
+        name="Gemini Generate Text",
+        run_type="llm",
+        metadata={"provider": "gemini"},
+    )
     async def generate_text(self, prompt: str) -> str:
         if not self.api_key:
             raise RuntimeError(
@@ -122,6 +128,11 @@ class GeminiProvider(ModelProvider):
                 )
                 response.raise_for_status()
                 data = response.json()
+                record_llm_usage(
+                    provider="gemini",
+                    model=model,
+                    usage=data.get("usage"),
+                )
                 return data["choices"][0]["message"]["content"]
         except httpx.ReadTimeout as exc:
             raise exc
@@ -131,6 +142,11 @@ class GeminiProvider(ModelProvider):
                 f"{exc.response.text[:500]}"
             ) from exc
 
+    @traceable_step(
+        name="Gemini Generate Structured",
+        run_type="chain",
+        metadata={"provider": "gemini"},
+    )
     async def generate_structured(
         self,
         prompt: str,

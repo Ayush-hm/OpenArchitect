@@ -11,6 +11,7 @@ from openarchitect.providers.structured_output import (
     compact_schema as _compact_schema,
     extract_json_object as _extract_json_object,
 )
+from openarchitect.observability import record_llm_usage, traceable_step
 
 load_dotenv()
 
@@ -23,7 +24,6 @@ class NvidiaNimProvider(ModelProvider):
         api_key: str | None = None,
         base_url: str | None = None,
         model: str | None = None,
-        allow_stub: bool | None = None,
     ) -> None:
         self.api_key = api_key or os.getenv("NVIDIA_NIM_API_KEY")
         self.base_url = (
@@ -41,7 +41,6 @@ class NvidiaNimProvider(ModelProvider):
         self.timeout_seconds = float(os.getenv("NVIDIA_NIM_TIMEOUT_SECONDS", "180"))
         self.max_tokens = int(os.getenv("NVIDIA_NIM_MAX_TOKENS", "4096"))
         self.force_json_response = os.getenv("NVIDIA_NIM_FORCE_JSON_RESPONSE", "").lower() == "true"
-        self.allow_stub = allow_stub if allow_stub is not None else os.getenv("OPENARCHITECT_ALLOW_RULE_FALLBACK") == "1"
 
     @property
     def metadata(self) -> dict[str, Any]:
@@ -57,11 +56,16 @@ class NvidiaNimProvider(ModelProvider):
             "force_json_response": self.force_json_response,
         }
 
+    @traceable_step(
+        name="NVIDIA NIM Generate Text",
+        run_type="llm",
+        metadata={"provider": "nvidia_nim"},
+    )
     async def generate_text(self, prompt: str) -> str:
         if not self.api_key:
             raise RuntimeError(
                 "NVIDIA_NIM_API_KEY is required for LLM mode. "
-                "Set OPENARCHITECT_ALLOW_RULE_FALLBACK=1 only for local fallback testing."
+                "Set OPENARCHITECT_MODEL_PROVIDER=gemini to use Gemini instead."
             )
 
         payload: dict[str, Any] = {
@@ -123,6 +127,11 @@ class NvidiaNimProvider(ModelProvider):
                 )
                 response.raise_for_status()
                 data = response.json()
+                record_llm_usage(
+                    provider="nvidia_nim",
+                    model=model,
+                    usage=data.get("usage"),
+                )
                 return data["choices"][0]["message"]["content"]
         except httpx.ReadTimeout as exc:
             raise exc
@@ -132,6 +141,11 @@ class NvidiaNimProvider(ModelProvider):
                 f"{exc.response.text[:500]}"
             ) from exc
 
+    @traceable_step(
+        name="NVIDIA NIM Generate Structured",
+        run_type="chain",
+        metadata={"provider": "nvidia_nim"},
+    )
     async def generate_structured(
         self,
         prompt: str,

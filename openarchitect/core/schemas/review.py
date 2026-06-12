@@ -13,10 +13,14 @@ class Severity(StrEnum):
 class ReviewFinding(BaseModel):
     id: str
     agent_role: str
+    framework: str | None = None
+    pillar: str | None = None
+    risk_area: str | None = None
     severity: Severity
     finding: str
     evidence: list[str] = Field(default_factory=list)
     affected_components: list[str] = Field(default_factory=list)
+    assumption_or_unknown: str | None = None
     recommendation: str
     requires_adr: bool = False
 
@@ -40,4 +44,3 @@ class ArchitectureDecision(BaseModel):
     impacted_components: list[str] = Field(default_factory=list)
     linked_finding_ids: list[str] = Field(default_factory=list)
     diagram_changes: list[str] = Field(default_factory=list)
-

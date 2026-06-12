@@ -52,10 +52,14 @@ export type ArchitectureGraph = {
 export type ReviewFinding = {
   id: string;
   agent_role: string;
+  framework?: string | null;
+  pillar?: string | null;
+  risk_area?: string | null;
   severity: Severity;
   finding: string;
   evidence: string[];
   affected_components: string[];
+  assumption_or_unknown?: string | null;
   recommendation: string;
   requires_adr: boolean;
 };
