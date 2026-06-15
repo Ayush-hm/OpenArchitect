@@ -131,32 +131,54 @@ export default function App() {
       </header>
 
       <main className="workspace">
-        <aside className="sidebar">       
-          <section className="stage-panel">
-            {workflowStages.map((stage) => (
-              <div className="stage-row" key={stage}>
-                {isRunning ? <Loader2 className="spin muted" size={14} /> : <CheckCircle2 size={14} />}
-                <span>{stage}</span>
-              </div>
-            ))}
-          </section>
-          <hr style={{ border: 'none', borderBottom: '0.1rem solid gray', marginTop: '2rem' }} />
-          <nav className="side-nav">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  className={selectedView === item.id ? "nav-button active" : "nav-button"}
-                  key={item.id}
-                  onClick={() => setSelectedView(item.id)}
-                  title={item.label}
-                >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+        <aside className="sidebar">
+          <div className="sidebar-content">
+            <div className="sidebar-section">
+              <span className="sidebar-title">PIPELINE</span>
+
+              <section className="stage-panel">
+                {workflowStages.map((stage) => (
+                  <div className="stage-row" key={stage}>
+                    <div className="stage-icon">
+                      {isRunning ? (
+                        <Loader2 className="spin" size={12} />
+                      ) : (
+                        <CheckCircle2 size={14} />
+                      )}
+                    </div>
+                    <span>{stage}</span>
+                  </div>
+                ))}
+              </section>
+            </div>
+
+            <hr className="sidebar-divider" />
+
+            <div className="sidebar-section">
+              <span className="sidebar-title">WORKSPACE</span>
+
+              <nav className="side-nav">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelectedView(item.id)}
+                      className={
+                        selectedView === item.id
+                          ? "nav-button active"
+                          : "nav-button"
+                      }
+                    >
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
         </aside>
 
         <section className="main-panel">
@@ -213,13 +235,13 @@ function EmptyState({
         {isRunning ? (
           <Loader2 className="spin" size={42} />
         ) : (
-          <div/>
+          <div />
         )}
 
         <h2>
           {isRunning
             ? "Architecture Review Running"
-            : "Upload a Software Architecture Document"}
+            : <h4>Upload a Software Architecture Document</h4>}
         </h2>
 
         <label className="large-file-drop">
