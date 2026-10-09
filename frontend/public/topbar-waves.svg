@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 180" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#eaf4ff"/>
+    </linearGradient>
+    <linearGradient id="waveA" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#9bcfff" stop-opacity=".48"/>
+      <stop offset=".52" stop-color="#d8ecff" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#70b5ff" stop-opacity=".48"/>
+    </linearGradient>
+    <linearGradient id="waveB" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#60aaff" stop-opacity=".30"/>
+      <stop offset=".55" stop-color="#b9dcff" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#8bc4ff" stop-opacity=".40"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="180" fill="url(#base)"/>
+  <circle cx="10" cy="-75" r="190" fill="none" stroke="#80bdff" stroke-opacity=".24" stroke-width="50"/>
+  <circle cx="1600" cy="210" r="170" fill="none" stroke="#74b5ff" stroke-opacity=".18" stroke-width="48"/>
+  <path d="M0 91 C190 105 253 172 464 155 C664 139 798 75 1010 99 C1250 126 1363 181 1600 119 L1600 180 L0 180Z" fill="url(#waveA)"/>
+  <path d="M0 119 C194 133 302 180 492 176 C714 169 846 111 1056 118 C1285 126 1450 164 1600 145 L1600 180 L0 180Z" fill="url(#waveB)"/>
+  <path d="M0 91 C190 105 253 172 464 155 C664 139 798 75 1010 99 C1250 126 1363 181 1600 119" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/>
+  <path d="M0 119 C194 133 302 180 492 176 C714 169 846 111 1056 118 C1285 126 1450 164 1600 145" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="1.2"/>
+</svg>

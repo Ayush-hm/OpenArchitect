@@ -26,6 +26,7 @@ async def consolidate_with_lead_architect_llm(
     findings: list[ReviewFinding],
     model_provider: ModelProvider,
     framework: FrameworkProfile = AWS_WELL_ARCHITECTED_PROFILE,
+    guideline_text: str = "",
 ) -> LeadArchitectOutput:
     prompt = f"""
 You are the Lead Architect agent.
@@ -36,6 +37,9 @@ plan.
 Configured pillars:
 {_pillar_summary(framework)}
 
+User-provided architectural guidelines:
+{guideline_text.strip() or "No additional user-provided guidelines."}
+
 Responsibilities:
 - Deduplicate overlapping findings.
 - Resolve conflicts across the configured framework pillars.
@@ -43,6 +47,8 @@ Responsibilities:
 - Decide which findings require ADRs.
 - Create architecture decisions only for ADR-worthy findings.
 - Preserve or rewrite finding IDs so linked decisions can reference them.
+- Preserve material findings about unmet user guideline requirements and make
+  related decisions when the architecture change is ADR-worthy.
 - Preserve framework, pillar, risk_area, and assumption_or_unknown metadata on
   final findings where possible.
 

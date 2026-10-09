@@ -78,6 +78,7 @@ async def review_architecture_for_pillar_with_llm(
     framework: FrameworkProfile,
     pillar: PillarProfile,
     langsmith_extra: dict[str, Any] | None = None,
+    guideline_text: str = "",
 ) -> list[ReviewFinding]:
     prompt = f"""
 You are the {pillar.reviewer_role} for the {framework.name}.
@@ -93,6 +94,9 @@ Review focus:
 Important unknowns to surface when absent or unclear:
 {_bullet_list(pillar.required_unknowns)}
 
+User-provided architectural guidelines:
+{guideline_text.strip() or "No additional user-provided guidelines."}
+
 ADR-worthy triggers for this pillar:
 {_bullet_list(pillar.adr_triggers)}
 
@@ -102,6 +106,11 @@ Severity guidance:
 Rules:
 - Generate concrete findings with evidence from nodes, edges, constraints,
   unknowns, attributes, or cited evidence.
+- Evaluate the architecture against the user-provided guidelines. Report
+  material guideline gaps, conflicts, and unmet requirements as findings.
+- Treat guidelines as evaluation criteria, not as evidence that the SAD's
+  architecture has implemented a requirement. Ground findings in the graph and
+  its SAD evidence, and identify the relevant guideline requirement.
 - Do not add generic best-practice advice that is not tied to the graph.
 - If a risk depends on missing information, make the missing information explicit
   in assumption_or_unknown.

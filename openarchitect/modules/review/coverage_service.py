@@ -44,6 +44,7 @@ async def critique_finding_coverage(
     model_provider: ModelProvider,
     framework: FrameworkProfile = AWS_WELL_ARCHITECTED_PROFILE,
     reviewed_pillar_ids: list[str] | None = None,
+    guideline_text: str = "",
 ) -> list[ReviewFinding]:
     reviewed_pillar_ids = reviewed_pillar_ids or sorted(
         {finding.pillar for finding in findings if finding.pillar}
@@ -60,6 +61,9 @@ Expected pillars:
 
 Reviewed pillar ids:
 {reviewed_pillar_ids}
+
+User-provided architectural guidelines:
+{guideline_text.strip() or "No additional user-provided guidelines."}
 
 Use the configured framework as the review contract. Check that all expected
 pillars were reviewed and that findings cover material risks already visible in
@@ -80,6 +84,9 @@ the graph, including:
 Rules:
 - Add findings only when they are grounded in graph nodes, edges, constraints,
   unknowns, attributes, or evidence.
+- Check that material requirements in the user-provided guidelines are covered
+  by findings when the graph shows a gap or the SAD leaves compliance unclear.
+- Treat guidelines as review criteria, not as evidence of implementation.
 - Do not add generic best-practice advice that is not tied to the graph.
 - Update or remove only findings that are unsupported, duplicated, or incorrectly
   scoped.

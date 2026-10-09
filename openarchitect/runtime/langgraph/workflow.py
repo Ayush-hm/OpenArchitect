@@ -20,6 +20,7 @@ from openarchitect.observability import traceable_step
 
 class ArchitectureReviewState(TypedDict, total=False):
     document_text: str
+    guideline_text: str
     architecture_v1: ArchitectureGraph
     pillar_findings: Annotated[list[ReviewFinding], add]
     reviewed_pillars: Annotated[list[str], add]
@@ -38,7 +39,11 @@ async def run_architecture_review(
 ) -> WorkflowResult:
     """Run the LangGraph LLM review workflow."""
     document_text = ingest_text(request.document_text)
-    state = await _run_llm_review_graph(document_text, model_provider)
+    state = await _run_llm_review_graph(
+        document_text,
+        model_provider,
+        guideline_text=request.guideline_text or "",
+    )
     architecture_v1 = state["architecture_v1"]
     findings = state["findings"]
     decisions = state["decisions"]
@@ -60,11 +65,12 @@ async def _run_llm_review_graph(
     document_text: str,
     model_provider: ModelProvider,
     framework: FrameworkProfile | None = None,
+    guideline_text: str = "",
 ) -> ArchitectureReviewState:
     framework = framework or get_framework_profile()
     workflow = _build_llm_review_graph(model_provider, framework)
     return await workflow.ainvoke(
-        {"document_text": document_text},
+        {"document_text": document_text, "guideline_text": guideline_text},
         config={
             "run_name": "OpenArchitect LangGraph Review",
             "tags": ["openarchitect", framework.id],
@@ -96,6 +102,7 @@ def _build_llm_review_graph(
                 model_provider,
                 framework,
                 pillar,
+                guideline_text=state.get("guideline_text", ""),
                 langsmith_extra={
                     "name": pillar.reviewer_role,
                     "metadata": {
@@ -118,6 +125,7 @@ def _build_llm_review_graph(
             model_provider,
             framework,
             state.get("reviewed_pillars", []),
+            guideline_text=state.get("guideline_text", ""),
         )
         return {"review_findings": covered_findings}
 
@@ -127,6 +135,7 @@ def _build_llm_review_graph(
             state.get("review_findings", []),
             model_provider,
             framework,
+            guideline_text=state.get("guideline_text", ""),
         )
         return {
             "findings": lead_output.findings,

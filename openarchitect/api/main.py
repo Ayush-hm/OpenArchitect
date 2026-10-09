@@ -57,6 +57,7 @@ async def create_architecture_review(
 @app.post("/workflows/architecture-review/upload", response_model=WorkflowRunResponse)
 async def upload_architecture_review(
     file: UploadFile = File(...),
+    guideline_file: UploadFile | None = File(None),
 ) -> WorkflowRunResponse:
     content = await file.read()
     try:
@@ -64,8 +65,24 @@ async def upload_architecture_review(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    guideline_text = None
+    if guideline_file is not None:
+        guideline_content = await guideline_file.read()
+        try:
+            guideline_text = extract_text_from_upload(
+                guideline_file.filename or "",
+                guideline_content,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"Guideline document: {exc}") from exc
+
     try:
-        result = await run_review_workflow(ArchitectureReviewRequest(document_text=document_text))
+        result = await run_review_workflow(
+            ArchitectureReviewRequest(
+                document_text=document_text,
+                guideline_text=guideline_text,
+            )
+        )
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     run_id = store.save(result)

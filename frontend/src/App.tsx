@@ -1,8 +1,7 @@
-import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, ReactNode, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Braces,
-  CheckCircle2,
   CircleDot,
   FileText,
   GitCompare,
@@ -12,10 +11,10 @@ import {
   ScrollText,
   Upload,
 } from "lucide-react";
-import { fetchHealth, uploadArchitectureDocument } from "./api";
-import { buildGraphDiff, graphToMermaid } from "./graph";
-import { MermaidDiagram } from "./components/MermaidDiagram";
-import type { ADR, ReviewFinding, WorkflowRunResponse } from "./types";
+import { uploadArchitectureDocument } from "./api.js";
+import { buildGraphDiff, graphToMermaid } from "./graph.js";
+import { MermaidDiagram } from "./components/MermaidDiagram.js";
+import type { ADR, ReviewFinding, WorkflowRunResponse } from "./types.js";
 
 type View = "overview" | "architecture" | "findings" | "adrs" | "changes" | "json";
 type GraphView = "current" | "target";
@@ -28,15 +27,14 @@ type Summary = {
 };
 
 const workflowStages = [
-  "Ingestion",
-  "Architecture Extraction",
-  "Graph Critic",
-  "AWS Pillar Review",
-  "Finding Coverage",
-  "Lead Architect",
-  "ADR Generation",
-  "Architecture v2 Planner",
-  "Diagram Update",
+  "Document ingestion",
+  "Architecture extraction",
+  "Graph critique",
+  "AWS pillar review",
+  "Finding coverage",
+  "Lead architect review",
+  "Decision records",
+  "Architecture v2",
 ];
 
 const navItems: Array<{ id: View; label: string; icon: typeof CircleDot }> = [
@@ -50,6 +48,7 @@ const navItems: Array<{ id: View; label: string; icon: typeof CircleDot }> = [
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
+  const [guidelineFile, setGuidelineFile] = useState<File | null>(null);
   const [run, setRun] = useState<WorkflowRunResponse | null>(null);
   const [selectedView, setSelectedView] = useState<View>("overview");
   const [graphView, setGraphView] = useState<GraphView>("target");
@@ -57,14 +56,6 @@ export default function App() {
   const [selectedAdr, setSelectedAdr] = useState<ADR | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [engine, setEngine] = useState("unknown");
-
-  useEffect(() => {
-    fetchHealth()
-      .then((health) => setEngine(health.engine))
-      .catch(() => setEngine("offline"));
-  }, []);
-
   const result = run?.result ?? null;
   const summary = useMemo(() => {
     if (!result) {
@@ -95,16 +86,26 @@ export default function App() {
     setError(null);
   }
 
+  function onGuidelineChange(event: ChangeEvent<HTMLInputElement>) {
+    const nextFile = event.target.files?.[0] ?? null;
+    setGuidelineFile(nextFile);
+    setError(null);
+  }
+
   async function runReview() {
+    if (!guidelineFile) {
+      setError("Upload an architectural guideline document first.");
+      return;
+    }
     if (!file) {
-      setError("Select a PDF, TXT, or MD document first.");
+      setError("Select the SAD or PRD you want reviewed.");
       return;
     }
     setIsRunning(true);
     setError(null);
     setSelectedView("overview");
     try {
-      const response = await uploadArchitectureDocument(file);
+      const response = await uploadArchitectureDocument(file, guidelineFile);
       setRun(response);
       setSelectedFinding(response.result.findings[0] ?? null);
       setSelectedAdr(response.result.adrs[0] ?? null);
@@ -118,14 +119,11 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div>
-          <div className="eyebrow">OpenArchitect</div>
-          <h1>Architecture Review Workspace</h1>
+        <div className="topbar-brand">
+          <img className="topbar-logo" src="/Logo.png" alt="OpenArchitect" />
+          {/* <p className="topbar-title">Architecture Review Workspace</p> */}
         </div>
         <div className="topbar-meta">
-          <span>Runtime: LangGraph</span>
-          <span>Provider: Gemini</span>
-          <span>Engine: {engine}</span>
           {run ? <span>Run: {run.run_id.slice(0, 8)}</span> : null}
         </div>
       </header>
@@ -134,19 +132,19 @@ export default function App() {
         <aside className="sidebar">
           <div className="sidebar-content">
             <div className="sidebar-section">
-              <span className="sidebar-title">PIPELINE</span>
+              <div className="pipeline-heading">
+                <span>Your review pipeline</span>
+                <span className="pipeline-count">8 stages</span>
+              </div>
+              <p className="pipeline-description">From first principles to your next iteration.</p>
 
               <section className="stage-panel">
-                {workflowStages.map((stage) => (
-                  <div className="stage-row" key={stage}>
-                    <div className="stage-icon">
-                      {isRunning ? (
-                        <Loader2 className="spin" size={12} />
-                      ) : (
-                        <CheckCircle2 size={14} />
-                      )}
+                {workflowStages.map((stage, index) => (
+                  <div className={`stage-row${index === 0 ? " current" : ""}`} key={stage}>
+                    <div className="stage-icon">{index + 1}</div>
+                    <div className="stage-copy">
+                      <span className="stage-name">{stage}</span>
                     </div>
-                    <span>{stage}</span>
                   </div>
                 ))}
               </section>
@@ -185,6 +183,8 @@ export default function App() {
           {!result ? (
             <EmptyState
               isRunning={isRunning}
+              guidelineFile={guidelineFile}
+              onGuidelineChange={onGuidelineChange}
               file={file}
               onFileChange={onFileChange}
               runReview={runReview}
@@ -218,12 +218,16 @@ export default function App() {
 
 function EmptyState({
   isRunning,
+  guidelineFile,
+  onGuidelineChange,
   file,
   onFileChange,
   runReview,
   error,
 }: {
   isRunning: boolean;
+  guidelineFile: File | null;
+  onGuidelineChange: (event: ChangeEvent<HTMLInputElement>) => void;
   file: File | null;
   onFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
   runReview: () => void;
@@ -234,32 +238,38 @@ function EmptyState({
       <div className="upload-center-card">
         {isRunning ? (
           <Loader2 className="spin" size={42} />
-        ) : (
-          <div />
-        )}
+        ) : null}
 
-        <h2>
-          {isRunning
-            ? "Architecture Review Running"
-            : <h4>Upload a Software Architecture Document</h4>}
-        </h2>
+        <h2>{isRunning ? "Architecture Review Running" : "Prepare your architecture review"}</h2>
 
-        <label className="large-file-drop">
+        <label className="large-file-drop document-upload">
+          <span className="upload-step">Step 1: Architecture Blueprint</span>
           <Upload size={38} />
-          <span>{file ? file.name : "Select Architecture Document"}</span>
-          <span><p>
-            PDF, TXT and Markdown files are supported.
-          </p></span>
+          <span>{guidelineFile ? guidelineFile.name : "Select File"}</span>
+          <span className="upload-hint">The review will use this document as its evaluation criteria.</span>
+          <input
+            accept=".pdf,.txt,.md"
+            type="file"
+            onChange={onGuidelineChange}
+          />
+        </label>
+
+        <label className={`large-file-drop document-upload${guidelineFile ? "" : " upload-disabled"}`}>
+          <span className="upload-step">Step 2: Software Architecture Document</span>
+          <Upload size={38} />
+          <span>{file ? file.name : "Select File"}</span>
+          <span className="upload-hint">The Architecture Document that has to be reviewed.</span>
           <input
             accept=".pdf,.txt,.md"
             type="file"
             onChange={onFileChange}
+            disabled={!guidelineFile || isRunning}
           />
         </label>
 
         <button
           className="primary-button large"
-          disabled={isRunning}
+          disabled={isRunning || !guidelineFile || !file}
           onClick={runReview}
         >
           {isRunning ? (

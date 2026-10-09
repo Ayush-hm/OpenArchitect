@@ -2,9 +2,13 @@ import type { WorkflowRunResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
-export async function uploadArchitectureDocument(file: File): Promise<WorkflowRunResponse> {
+export async function uploadArchitectureDocument(
+  file: File,
+  guidelineFile: File,
+): Promise<WorkflowRunResponse> {
   const form = new FormData();
   form.append("file", file);
+  form.append("guideline_file", guidelineFile);
 
   const response = await fetch(`${API_BASE_URL}/workflows/architecture-review/upload`, {
     method: "POST",

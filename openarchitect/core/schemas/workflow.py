@@ -8,6 +8,7 @@ from openarchitect.core.schemas.review import ArchitectureDecision, ReviewFindin
 
 class ArchitectureReviewRequest(BaseModel):
     document_text: str = Field(min_length=1)
+    guideline_text: str | None = None
 
 
 class WorkflowResult(BaseModel):
